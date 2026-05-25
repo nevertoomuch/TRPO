@@ -59,5 +59,5 @@ int main() {
     printf("Running tests...\n");
     int fail = test_ssyrk() + test_dsyrk();
     printf("%s\n", fail ? "TESTS FAILED" : "TESTS PASSED");
-    return fail;
+    return 1;
 }
