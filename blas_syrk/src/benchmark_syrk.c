@@ -15,13 +15,13 @@ void my_dsyrk(const enum CBLAS_ORDER Order, const enum CBLAS_UPLO Uplo,
               const double alpha, const double *A, const int lda,
               const double beta, double *C, const int ldc);
 
-void matrix_float(float *A, int rows, int cols) {
+void init_matrix_float(float *A, int rows, int cols) {
     for (int i = 0; i < rows * cols; i++) {
         A[i] = (float)rand() / RAND_MAX * 2.0f - 1.0f;
     }
 }
 
-void matrix_double(double *A, int rows, int cols) {
+void init_matrix_double(double *A, int rows, int cols) {
     for (int i = 0; i < rows * cols; i++) {
         A[i] = (double)rand() / RAND_MAX * 2.0 - 1.0;
     }
@@ -35,7 +35,7 @@ double benchmark_ssyrk(int N, int K, int use_my_impl, int num_threads) {
     float *A = (float*)malloc(lda * K * sizeof(float));
     float *C = (float*)malloc(ldc * N * sizeof(float));
     
-    matrix_float(A, lda, K);
+    init_matrix_float(A, lda, K);
     
     omp_set_num_threads(num_threads);
     
@@ -73,7 +73,7 @@ double benchmark_dsyrk(int N, int K, int use_my_impl, int num_threads) {
     double *A = (double*)malloc(lda * K * sizeof(double));
     double *C = (double*)malloc(ldc * N * sizeof(double));
     
-    matrix_double(A, lda, K);
+    init_matrix_double(A, lda, K);
     
     omp_set_num_threads(num_threads);
     
@@ -103,7 +103,7 @@ double benchmark_dsyrk(int N, int K, int use_my_impl, int num_threads) {
     return (end - start);
 }
 
-double geometric(double *values, int n) {
+double geometric_mean(double *values, int n) {
     double sum_log = 0.0;
     for (int i = 0; i < n; i++) {
         sum_log += log(values[i]);
@@ -111,7 +111,7 @@ double geometric(double *values, int n) {
     return exp(sum_log / n);
 }
 
-void run_ssyrk() {
+void run_ssyrk_performance_tests() {
     printf("\nSSYRK\n");
     
     int N = 2048;
@@ -141,15 +141,16 @@ void run_ssyrk() {
                    run + 1, time_my, time_blas, perf_ratio, time_my / time_blas);
         }
         
-        double geo_mean = geometric(perf_ratios, iterations);
+        double geo_mean = geometric_mean(perf_ratios, iterations);
         
         printf("\nСреднее геометрическое производительности: %.2f%%\n", geo_mean);
         printf("Ускорение относительно OpenBLAS: %.2fx\n\n", geo_mean / 100.0);
     }
 }
 
-void run_dsyrk() {
+void run_dsyrk_performance_tests() {
     printf("\nDSYRK\n");
+    
     int N = 2048;
     int K = 2048;
     int iterations = 10;
@@ -177,7 +178,7 @@ void run_dsyrk() {
                    run + 1, time_my, time_blas, perf_ratio, time_my / time_blas);
         }
         
-        double geo_mean = geometric(perf_ratios, iterations);
+        double geo_mean = geometric_mean(perf_ratios, iterations);
         
         printf("\nСреднее геометрическое производительности: %.2f%%\n", geo_mean);
         printf("Ускорение относительно OpenBLAS: %.2fx\n\n", geo_mean / 100.0);
@@ -187,8 +188,8 @@ void run_dsyrk() {
 int main() {
     srand(42);
     
-    run_ssyrk();
-    run_dsyrk();
+    run_ssyrk_performance_tests();
+    run_dsyrk_performance_tests();
     
     return 0;
 }

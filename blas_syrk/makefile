@@ -1,20 +1,22 @@
 CC = gcc
-CFLAGS = -O3 -march=native -std=c11 -I./src -fopenmp
-LDFLAGS = -lopenblas -lm -fopenmp
+CFLAGS = -fopenmp -O3 -Wall
+LDFLAGS = -lopenblas -lm
 
-SYRK_SRC = src/syrk.c
-BENCH_SRC = tests/benchmark_syrk.c
-TARGET = benchmark_syrk
+all: benchmark_syrk test_syrk
 
-all: $(TARGET)
+benchmark_syrk: src/benchmark_syrk.c src/syrk.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(TARGET): $(SYRK_SRC) $(BENCH_SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SYRK_SRC) $(BENCH_SRC) $(LDFLAGS)
+test_syrk: tests/test_syrk.c src/syrk.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+test: test_syrk
+	./test_syrk
+
+perf: benchmark_syrk
+	./benchmark_syrk
 
 clean:
-	rm -f $(TARGET)
+	rm -f benchmark_syrk test_syrk
 
-run: $(TARGET)
-	./$(TARGET)
-
-.PHONY: all clean run
+.PHONY: all test perf clean
