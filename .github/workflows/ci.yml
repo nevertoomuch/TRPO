@@ -20,12 +20,16 @@ jobs:
         sudo apt-get install -y libopenblas-dev libomp-dev gcc make
         
     - name: Build project
-      run: make all
+      run: |
+        cd blas_syrk  # Заходим в папку с кодом
+        make all
       
     - name: Run interface tests
-      run: make test
+      run: |
+        cd blas_syrk
+        make test
       
     - name: Run performance tests
       run: |
-        echo "Running performance tests..."
+        cd blas_syrk
         make perf
